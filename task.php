@@ -1,6 +1,6 @@
 <?php
 
-define("TASKS_FILE","tasks.json");
+define("TASKS_FILE", "tasks.json");
 
 function saveTasks(array $tasks): void
 {
@@ -8,7 +8,22 @@ function saveTasks(array $tasks): void
 }
 
 
+
+function loadTasks()
+{
+    if (!file_exists(TASKS_FILE)) {
+        return [];
+    }
+
+    $data = file_get_contents(TASKS_FILE);
+
+    return $data ? json_decode($data, true) : [];
+}
+
 $tasks = loadTasks();
+
+
+//$tasks = loadTasks();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['task']) && !empty(trim($_POST['task']))) {
@@ -17,6 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "done" => false
         ];
 
+        saveTasks($tasks);
+        header('Location:' . $_SERVER['PHP_SELF']);
+        exit;
+    } elseif (isset($_POST['delete'])) {
+
+        unset($tasks[$_POST['delete']]);
+        $tasks = array_values($tasks);
+        saveTasks($tasks);
+        header('Location:' . $_SERVER['PHP_SELF']);
+        exit;
+    } elseif (isset($_POST['toggle'])) {
+        $tasks[$_POST['toggle']]['done'] = !$tasks[$_POST['toggle']]['done'];
         saveTasks($tasks);
         header('Location:' . $_SERVER['PHP_SELF']);
         exit;
@@ -85,8 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <div class="task-card">
             <h1>To-Do App</h1>
-
-            <!-- Add Task Form -->
             <form method="POST">
                 <div class="row">
                     <div class="column column-75">
@@ -101,30 +126,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Task List -->
             <h2>Task List</h2>
             <ul style="list-style: none; padding: 0;">
-                <!-- TODO: Loop through tasks array and display each task with a toggle and delete option -->
-                <!-- If there are no tasks, display a message saying "No tasks yet. Add one above!" -->
 
-                <li>No tasks yet. Add one above!</li>
-                <!-- if there are tasks, display each task with a toggle and delete option -->
+                <?php if (empty($tasks)): ?>
 
+                    <li>No tasks yet. Add one above!</li>
+                <?php else: ?>
+                    <?php foreach ($tasks as $index => $task): ?>
+                        <li class="task-item">
+                            <form method="POST" style="flex-grow: 1;">
+                                <input type="hidden" name="toggle" value="<?= $index ?>">
 
-                <li class="task-item">
-                    <form method="POST" style="flex-grow: 1;">
-                        <input type="hidden" name="toggle" value="">
+                                <button type="submit" style="border: none; background: none; cursor: pointer; text-align: left; width: 100%;">
+                                    <span class="task <?= $task['done'] ? 'task-done' : '' ?>">
+                                        <?= $task['task'] ?>
+                                    </span>
+                                </button>
+                            </form>
 
-                        <button type="submit" style="border: none; background: none; cursor: pointer; text-align: left; width: 100%;">
-                            <span class="task">
-                                Task 1
-                            </span>
-                        </button>
-                    </form>
-
-                    <form method="POST">
-                        <input type="hidden" name="delete" value="">
-                        <button type="submit" class="button button-outline" style="margin-left: 10px;">Delete</button>
-                    </form>
-                </li>
-
+                            <form method="POST">
+                                <input type="hidden" name="delete" value="<?= $index ?>">
+                                <button type="submit" class="button button-outline" style="margin-left: 10px;">Delete</button>
+                            </form>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </ul>
 
         </div>
