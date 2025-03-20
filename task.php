@@ -54,13 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
-
-
-
-
-
-<!-- UI -->
-
 <!DOCTYPE html>
 <html lang="en">
 
