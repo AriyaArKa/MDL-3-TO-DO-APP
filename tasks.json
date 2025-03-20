@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "task": "task 1 : tommorow task submission",
+        "done": false
+    },
+    {
+        "task": "task3 : json deleted properly",
+        "done": false
+    },
+    {
+        "task": "task 2: new file working",
+        "done": true
+    }
+]
